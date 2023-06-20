@@ -1,0 +1,4 @@
+[core]
+    remote = kv_gdrive
+['remote "kv_gdrive"']
+    url = gdrive://1wNK9emvso6cb5CbCZp8jvO7eHU9Hw0zQ
