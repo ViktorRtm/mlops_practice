@@ -1,4 +1,6 @@
 pytest
+dvc==2.58.2
+dvc-gdrive
 httpx
 fastapi
 uvicorn
