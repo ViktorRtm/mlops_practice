@@ -17,6 +17,7 @@ def request_answer(answer_json):
                                   'question': answer_json['question']})
     return response_answer
 
+
 @pytest.fixture
 def script_path():
     return os.path.dirname(os.path.abspath(__file__))
