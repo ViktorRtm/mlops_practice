@@ -1,0 +1,70 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>echo &quot;--------------- BUILD_NUMBER:&quot;$BUILD_NUMBER
+pwd
+rm -fR *</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>echo &quot;------------------- download repositoriy ---------------------&quot;
+git clone https://github.com/ViktorRtm/mlops_practice.git</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+echo &quot;------------------- install libraries ---------------------&quot;
+python3 -m venv venv
+source ./venv/bin/activate
+pip install pytest flake8
+cd mlops_practice/final/code/
+pip install -r requirements.txt
+cd ..
+echo &quot;------------------- pull datasets from DVC ---------------------&quot;
+dvc pull
+cd code/
+echo &quot;------------------- Unit tests ---------------------&quot;
+pytest
+echo &quot;------------------- Linter tests ---------------------&quot;
+flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>echo &quot;------------------- Build Docker image ---------------------&quot;
+cd mlops_practice/final
+docker image build -t mlops-final:0.$BUILD_NUMBER .</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>#!/bin/bash
+echo &quot;------------------- Stop previously started Application ---------------------&quot;
+for container_id in `docker ps | grep &quot;mlops-final&quot; | awk &apos;{ print $1 }&apos;`; do
+  docker kill $container_id
+done;
+
+echo &quot;------------------- Run application in Docker ---------------------&quot;
+docker run -p 8000:8000/tcp -d mlops-final:0.$BUILD_NUMBER
+echo &quot;------------------- Wait for starting application ---------------------&quot;
+sleep 60
+echo &quot;------------------- Application life probe ---------------------&quot;
+EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+curl -fsSL http://$EXT_IP:8000/ | cmp mlops_practice/final/datasets/root_response.txt -</command>
+      <configuredLocalRules/>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
