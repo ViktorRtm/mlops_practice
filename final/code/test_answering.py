@@ -1,5 +1,24 @@
+import pytest
 from fastapi.testclient import TestClient
 from api_answering import app
+import json
+import os
+
+
+def load_json_file(file_path):
+    with open(file_path) as test_file:
+        json_txt = test_file.read()
+    parsed_json = json.loads(json_txt)
+    return parsed_json
+
+def request_answer(answer_json):
+    response_answer = client.post("/answer/", json={'context': answer_json['context'],
+        'question': answer_json['question']})
+    return response_answer   
+
+@pytest.fixture
+def script_path():
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 client = TestClient(app)
@@ -39,3 +58,43 @@ def test_nswer():
 
     assert response_answer.status_code == 200
     assert json_data['answer'] == 'his brother, a bank manager'
+
+def test_answer_1(script_path):
+    test_file_path = script_path+'/../datasets/answer_response_1.json'
+    parsed_json = load_json_file(test_file_path)
+    response_answer = request_answer(parsed_json)
+    
+    assert response_answer.status_code == 200
+    assert parsed_json['answer'] == response_answer.json()['answer']
+
+def test_answer_2(script_path):
+    test_file_path = script_path+'/../datasets/answer_response_2.json'
+    parsed_json = load_json_file(test_file_path)
+    response_answer = request_answer(parsed_json)
+    
+    assert response_answer.status_code == 200
+    assert parsed_json['answer'] == response_answer.json()['answer']
+
+def test_answer_3(script_path):
+    test_file_path = script_path+'/../datasets/answer_response_3.json'
+    parsed_json = load_json_file(test_file_path)
+    response_answer = request_answer(parsed_json)
+    
+    assert response_answer.status_code == 200
+    assert parsed_json['answer'] == response_answer.json()['answer']
+
+def test_answer_4(script_path):
+    test_file_path = script_path+'/../datasets/answer_response_4.json'
+    parsed_json = load_json_file(test_file_path)
+    response_answer = request_answer(parsed_json)
+    
+    assert response_answer.status_code == 200
+    assert parsed_json['answer'] == response_answer.json()['answer']
+
+def test_answer_5(script_path):
+    test_file_path = script_path+'/../datasets/answer_response_5.json'
+    parsed_json = load_json_file(test_file_path)
+    response_answer = request_answer(parsed_json)
+    
+    assert response_answer.status_code == 200
+    assert parsed_json['answer'] == response_answer.json()['answer']
